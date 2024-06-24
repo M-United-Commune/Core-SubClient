@@ -1,4 +1,4 @@
-use std::{io::Write, process::Stdio, sync::Arc};
+use std::{io::Write, process::Stdio, sync::Arc, vec};
 
 use futures_util::{SinkExt, StreamExt};
 use lib::config::SubConfig;
@@ -10,6 +10,13 @@ mod lib;
 async fn main() {
     // 服务端配置
     let config = lib::config::SubConfig::default();
+
+    // 创建文件夹：server、plugins、config、worlds
+    let filedirs = vec!["server", "plugins", "config", "worlds"];
+    for filedir in filedirs {
+        std::fs::create_dir_all(format!("./{}", filedir)).expect("创建文件夹失败");
+    }
+
     // 服务端状态
     let mut substate = Arc::new(Mutex::new(SubState::Stopped));
     let mut subchild = Arc::new(Mutex::new(None));
@@ -34,16 +41,14 @@ async fn main() {
             _ => continue,
         };
         let messagedata: MessageData = serde_json::from_str(&message).unwrap();
-        let messsage_event =
+        let _messsage_event =
             handle_message(&mut substate, &mut subchild, config.clone(), &messagedata).await;
-        if let ClientAction::Query = messsage_event {
-            let result = ResultMessage {
-                server: messagedata.server.clone(),
-                sub_state: substate.lock().await.clone(),
-            };
-            let result = serde_json::to_string(&result).unwrap();
-            _write.send(Message::Text(result)).await.unwrap();
-        }
+        let result = ResultMessage {
+            server: messagedata.server.clone(),
+            sub_state: substate.lock().await.clone(),
+        };
+        let result = serde_json::to_string(&result).unwrap();
+        _write.send(Message::Text(result)).await.unwrap();
     }
 }
 
@@ -112,11 +117,6 @@ async fn handle_message(
             println!("Restarting server: {}", message.server);
             ClientAction::Restart
         }
-        ClientAction::Query => {
-            println!("Server-State: {:?}", substate.lock().await.clone());
-            // 返回服务器状态给客户端
-            ClientAction::Query
-        }
     }
 }
 pub enum MessageEvent {
@@ -138,8 +138,6 @@ pub enum ClientAction {
     Stop,
     // 重启子服
     Restart,
-    // 查询
-    Query,
 }
 
 impl From<String> for ClientAction {
@@ -148,7 +146,6 @@ impl From<String> for ClientAction {
             "start" => ClientAction::Start,
             "stop" => ClientAction::Stop,
             "restart" => ClientAction::Restart,
-            "query" => ClientAction::Query,
             _ => panic!("Invalid value: {}", value),
         }
     }
@@ -216,6 +213,9 @@ pub async fn start_client(server_jar: String) -> Result<Child, std::io::Error> {
     let java_memory_max: String = format!("{}", sys_info.1.to_string().replace(" ", "")); // 示例最大内存
 
     // java -Xms1024M -Xmx2048M -jar server.jar --nogui
+    // 在指定路径下启动服务端
+    // 切换到路径server
+    std::env::set_current_dir("server").expect("切换路径失败");
     Command::new("java")
         .args(&[
             "-Xms".to_string() + &java_memory_start,
