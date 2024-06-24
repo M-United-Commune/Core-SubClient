@@ -1,0 +1,20 @@
+[package]
+name = "core-subclient"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+env_logger = "0.6"
+
+# 解析
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9.27"
+serde_json = "1.0.88"
+systemstat = "0.2.3" 
+
+# 多线程异步
+tokio = { version = "1", features = ["full"] }
+futures-util = { version = "0.3", default-features = false }
+tokio-tungstenite = "*"
+url = "2.5.2"
+futures-channel = "0.3.30"
