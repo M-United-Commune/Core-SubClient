@@ -1,11 +1,8 @@
-use std::{
-    io::Write,
-    process::Stdio,
-    sync::Arc,
-};
+use std::{io::Write, process::Stdio, sync::Arc};
 
 use futures_util::{SinkExt, StreamExt};
 use lib::config::SubConfig;
+use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use tokio::sync::Mutex;
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 mod lib;
@@ -16,8 +13,16 @@ async fn main() {
     // 服务端状态
     let mut substate = Arc::new(Mutex::new(SubState::Stopped));
     let mut subchild = Arc::new(Mutex::new(None));
-    let url = "ws://127.0.0.1:2024/api/subserver/ws?server_name=%E5%AE%8C%E5%85%A8".to_string();
+    let server_name_encoded =
+        utf8_percent_encode(&config.server_name, NON_ALPHANUMERIC).to_string();
+    let url = format!("{}?server_name={}", config.uri, server_name_encoded);
+
     let (ws_stream, _) = connect_async(&url).await.expect("Failed to connect");
+    // 美化输出
+    println!("Server-Name: {}", config.server_name);
+    println!("Server-URI: {}", config.uri);
+    println!("Server-Jar: {}", config.server_jar);
+
     // 接受消息
     let (mut _write, mut read) = ws_stream.split();
 
