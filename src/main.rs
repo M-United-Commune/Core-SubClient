@@ -117,6 +117,31 @@ async fn handle_message(
             println!("Restarting server: {}", message.server);
             ClientAction::Restart
         }
+        // ClientAction::AcceptCore => todo!(),
+        // ClientAction::AcceptPlugin => todo!(),
+        // ClientAction::AcceptConfig => todo!(),
+        // ClientAction::AcceptWorld => todo!(),
+
+        //   接受核心
+        ClientAction::AcceptCore => {
+            println!("Accepting core: {}", message.server);
+            ClientAction::AcceptCore
+        }
+        //   接受插件
+        ClientAction::AcceptPlugin => {
+            println!("Accepting plugin: {}", message.server);
+            ClientAction::AcceptPlugin
+        }
+        //   接受配置
+        ClientAction::AcceptConfig => {
+            println!("Accepting config: {}", message.server);
+            ClientAction::AcceptConfig
+        }
+        //   接受世界
+        ClientAction::AcceptWorld => {
+            println!("Accepting world: {}", message.server);
+            ClientAction::AcceptWorld
+        }
     }
 }
 pub enum MessageEvent {
@@ -127,6 +152,7 @@ pub enum MessageEvent {
 pub struct MessageData {
     pub server: String,
     pub action: ClientAction,
+    pub data: Option<Vec<u8>>,
 }
 
 // 客户端操作
@@ -138,6 +164,14 @@ pub enum ClientAction {
     Stop,
     // 重启子服
     Restart,
+    // 接受核心
+    AcceptCore,
+    // 接受插件
+    AcceptPlugin,
+    // 接受配置
+    AcceptConfig,
+    // 接受世界
+    AcceptWorld,
 }
 
 impl From<String> for ClientAction {
