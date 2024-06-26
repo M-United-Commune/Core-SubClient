@@ -4,19 +4,9 @@
 
 Core-SubClient 是一个附属子服客户端，旨在通过 WebSocket (`ws`) 实现与子服务器的实时通讯和控制。
 
-## 文档
+## 在线请求文档
 
-接受消息格式
-```
-{
-    // 被接受服务器
-    "server":"服务器名称",
-    // 请求指令
-    "action":"Query",
-    //消息内容
-    "data":null
-}
-```
+https://apifox.com/apidoc/shared-b47df934-dbe1-4b96-8801-d3f366685f77
 
 ## 功能计划
 
