@@ -1,7 +1,6 @@
 // 配置文件
 
 use std::{
-    default,
     fs::File,
     io::{Read, Write},
 };
@@ -20,17 +19,24 @@ impl Default for SubConfig {
     fn default() -> Self {
         let file_path = "config.yml";
         let config = SubConfig {
-            uri: "ws://127.0.0.1:2024/api/subserver/ws".to_string(), // 服务器地址
-            server_name: "服务器名称".to_string(),                   // 服务器名称
-            server_jar: "paper-1.20.6-147.jar".to_string(),                   // 服务器jar包
+            uri: "ws://127.0.0.1:2024/api/subserver".to_string(), // 服务器地址
+            server_name: "服务器名称".to_string(),                // 服务器名称
+            server_jar: "paper-1.20.6-147.jar".to_string(),       // 服务器jar包
         };
         match read_yml(&file_path) {
             Ok(config) => config,
             Err(_err) => {
+                // 当前路径
                 let _ = write_config_to_yml(&config, file_path);
                 config
             }
         }
+    }
+}
+impl SubConfig {
+    pub fn write_to_file(&self) -> Result<(), Box<dyn std::error::Error>> {
+        let file_path = "config.yml";
+        write_config_to_yml(self, file_path)
     }
 }
 

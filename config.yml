@@ -1,3 +1,3 @@
-uri: ws://127.0.0.1:2024/api/subserver/ws
+uri: ws://127.0.0.1:2024/api/subserver
 server_name: 服务器名称
-server_jar: paper-1.20.6-147.jar
+server_jar: paper-1.20.666.jar
