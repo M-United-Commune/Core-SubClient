@@ -50,6 +50,10 @@ async fn main() {
         // 接受消息
         let (mut ws_write, mut read) = main_ws_stream.split();
 
+        // 异步发送状态
+        /*
+
+        */
         // 异步收取消息
         while let Some(ws_msg_datas) = read.next().await {
             let (client_action, messagedata) = match ws_msg_datas {
@@ -99,8 +103,9 @@ async fn main() {
                         .send(Message::Text(serde_json::to_string(&result).unwrap()))
                         .await
                         .expect("发送消息失败");
+                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
                 }
-                ClientAction::AcceptPlugin => todo!(),
+                ClientAction::AcceptPlugin => {}
                 ClientAction::AcceptConfig => todo!(),
                 ClientAction::AcceptWorld => todo!(),
             }
