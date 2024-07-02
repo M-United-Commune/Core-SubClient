@@ -105,6 +105,24 @@ async fn main() {
                         .expect("发送消息失败");
                     tokio::time::sleep(std::time::Duration::from_secs(1)).await;
                 }
+                ClientAction::Command(_) => {
+                    let command = String::from_utf8(messagedata).unwrap()+"\n";
+                    println!("收到指令: {}", command);
+                    if substate.lock().await.clone() == SubState::Running {
+                        let mut subchild = subchild.lock().await;
+                        match subchild.as_mut() {
+                            Some(child) => {
+                                child
+                                    .stdin
+                                    .as_mut()
+                                    .unwrap()
+                                    .write_all(command.as_bytes())
+                                    .expect("写入命令失败");
+                            }
+                            None => {}
+                        }
+                    }
+                }
                 ClientAction::AcceptPlugin => {}
                 ClientAction::AcceptConfig => todo!(),
                 ClientAction::AcceptWorld => todo!(),
@@ -203,6 +221,8 @@ pub enum ClientAction {
     AcceptWorld,
     // 获取状态
     GetState,
+    // 指令
+    Command(String),
 }
 
 impl From<String> for ClientAction {
@@ -224,7 +244,7 @@ impl From<String> for ClientAction {
             "AcceptConfig" => ClientAction::AcceptConfig,
             "AcceptWorld" => ClientAction::AcceptWorld,
             "GetState" => ClientAction::GetState,
-            _ => panic!("Invalid value: {}", value),
+            _ => ClientAction::Command(value),
         }
     }
 }
@@ -240,7 +260,7 @@ impl From<u8> for ClientAction {
             5 => ClientAction::AcceptConfig,
             6 => ClientAction::AcceptWorld,
             7 => ClientAction::GetState,
-            _ => panic!("Invalid value: {}", value),
+            _ => ClientAction::Command(value.to_string()),
         }
     }
 }
